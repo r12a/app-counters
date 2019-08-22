@@ -27,6 +27,8 @@ function convertCSS2Char ( str ) {
 
 
 
+
+
 function parseRule (rule, numbers) {
 	// figures out the sytem and symbols and selects the appropriate processing algorithm
 	// returns a space-separated list of numbers
@@ -41,10 +43,14 @@ function parseRule (rule, numbers) {
 	if (rule == 'trad-chinese-formal') return tradchineseformal(numbers)
 	if (rule == 'trad-chinese-informal') return tradchineseinformal(numbers)
 	
+	
+	// remove comments
+	rule = rule.replace(/\/\*[^\*]+\*\//g,'')
+	
 	// identify the system	
 	var ruleType = rule.match(/system:[\s]*([^\s]+)[\s]*;/)[1]
 	if (ruleType==null) { alert('System not recognised.'); return numbers }
-	else if (ruleType != 'numeric' && ruleType != 'alphabetic' && ruleType != 'fixed' && ruleType != 'additive')  { alert('System not recognised: '+ruleType); return numbers }
+	else if (ruleType != 'cyclic' && ruleType != 'numeric' && ruleType != 'alphabetic' && ruleType != 'fixed' && ruleType != 'additive')  { alert('System not recognised: '+ruleType); return numbers }
 	
 	// get the symbols
 	var symbolMatch = rule.match(/symbols:([^;]+);/)
@@ -52,12 +58,20 @@ function parseRule (rule, numbers) {
 	else {
 		symbolList = symbolMatch[1]
 		symbolList = convertCSS2Char(symbolList)
-		symbolList = symbolList.replace(/'|,/g,' ').replace(/[\s]+/g,' ').trim()
+		symbolList = symbolList.replace(/'|,|"/g,' ').replace(/[\s]+/g,' ').trim()
 		symbolArray = symbolList.split(' ')
 		if (debug) console.log('symbolList',symbolList, 'symbolArray',symbolArray)
 		}
 	
 	// get the range
+	switch (ruleType) {
+		case 'numeric': lowerLimit = -9999999; upperLimit = 9999999; break;
+		case 'cyclic': lowerLimit = -9999999; upperLimit = 9999999; break;
+		case 'fixed': lowerLimit = -9999999; upperLimit = 9999999; break;
+		case 'alphabetic': lowerLimit = 1; upperLimit = 9999999; break;
+		case 'symbolic': lowerLimit = 1; upperLimit = 9999999; break;
+		case 'additive': lowerLimit = 0; upperLimit = 9999999; break;
+		}
 	var range = rule.match(/range:[\s]*([^\s]+)[\s]+([^\s]+)[\s]*;/)
 	if (range != null) {
 		upperLimit = parseInt(range[2])
@@ -65,16 +79,36 @@ function parseRule (rule, numbers) {
 		if (debug) console.log(lowerLimit, upperLimit)
 		}
 
+	// identify the suffix
+	var suffix = ''
+	//suffix = rule.match(/suffix:[\s]*([^\s]+)[\s]*;/)
+	suffix = rule.match(/suffix:([^;]+);/)
+	if (suffix !== null) {
+		suffix = suffix[1]
+		suffix = suffix.replace(/'|"/g, '').trim()
+		suffix = convertCSS2Char(suffix)
+		}
+	else {
+		console.log('No suffix.')
+		suffix = ''
+		}
+	
 	
 	switch (ruleType) {
-		case 'numeric': return produceNumeric(numbers, symbolArray); break
-		case 'alphabetic': return produceAlphabetic(numbers, symbolArray); break
-		case 'fixed': return produceFixed(numbers, symbolArray); break
-		case 'additive': return produceAdditive(numbers, symbolArray, lowerLimit, upperLimit); break
+		case 'cyclic': return produceCyclic(numbers, symbolArray, suffix); break
+		case 'numeric': return produceNumeric(numbers, symbolArray, suffix); break
+		case 'alphabetic': return produceAlphabetic(numbers, symbolArray, suffix); break
+		case 'fixed': return produceFixed(numbers, symbolArray, suffix); break
+		case 'additive': return produceAdditive(numbers, symbolArray, lowerLimit, upperLimit, suffix); break
 		}
 	}
 
-function produceNumeric (numList, symbolList) {
+
+
+
+
+function produceCyclic (numList, symbolList, suffix) {
+	// for each of the items in the input, generate a counter
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
 	
@@ -83,11 +117,39 @@ function produceNumeric (numList, symbolList) {
 	var numbers = numList.split(' ')
 
 	var ok = true
-	for (i=0;i<numbers.length;i++) if (parseInt(numbers[i]) < 0) ok = false
+	for (let i=0;i<numbers.length;i++) if (parseInt(numbers[i]) <= 0) ok = false
+	if (! ok) alert('Unable to handle zero or negative numbers in the cyclic system.')
+
+	var base = symbolList.length
+	for (let n=0; n<numbers.length; n++) {
+		var num = parseInt(numbers[n])
+		if (isNaN(num)) value = numbers[n]
+		else if (num <= 0)  value = numbers[n]
+		else value = symbolList[(num-1) % base]
+		out += value
+		if (document.getElementById('showSuffix').checked) out += suffix
+		out += ' '
+		}
+	if (debug) console.log(out)
+	return out
+	}
+
+
+function produceNumeric (numList, symbolList, suffix) {
+	// for each of the items in the input, generate a counter
+	// numList, space-separated list of ascii numbers to convert
+	// symbolList, array of symbols
+	
+	var out = ''
+	numList = numList.replace(/[\s]+/g,' ').trim()
+	var numbers = numList.split(' ')
+
+	var ok = true
+	for (let i=0;i<numbers.length;i++) if (parseInt(numbers[i]) < 0) ok = false
 	if (! ok) alert('Unable to handle negative numbers in the numeric system.')
 
 	var base = symbolList.length
-	for (n=0; n<numbers.length; n++) {
+	for (let n=0; n<numbers.length; n++) {
 		if (parseInt(numbers[n]) < 0)  value = numbers[n]
 		else if (numbers[n] == '0') value = symbolList[0]
 		else {
@@ -97,13 +159,16 @@ function produceNumeric (numList, symbolList) {
 				numbers[n] = Math.floor(numbers[n]/base)
 				}
 			}
-		out += value+' '
+		out += value
+		if (document.getElementById('showSuffix').checked) out += suffix
+		out += ' '
 		}
 	if (debug) console.log(out)
 	return out
 	}
 
-function produceAlphabetic (numList, symbolList) {
+
+function produceAlphabetic (numList, symbolList, suffix) {
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
 	
@@ -122,13 +187,15 @@ function produceAlphabetic (numList, symbolList) {
 				}
 			}
 		else S = value
-		out += S+' '
+		out += S
+		if (document.getElementById('showSuffix').checked) out += suffix
+		out += ' '
 		}
 	if (debug) console.log(out)
 	return out
 	}
 
-function produceFixed (numList, symbolList) {
+function produceFixed (numList, symbolList, suffix) {
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
 
@@ -137,15 +204,23 @@ function produceFixed (numList, symbolList) {
 	var numbers = numList.split(' ')
 	var N = symbolList.length
 	for (i=0; i<numbers.length; i++) {
-		if (numbers[i] <= N && numbers[i] > 0) out += symbolList[numbers[i]-1] + ' '
-		else out += numbers[i]+' '
+		if (numbers[i] <= N && numbers[i] > 0) {
+			out += symbolList[numbers[i]-1]
+			if (document.getElementById('showSuffix').checked) out += suffix
+			out += ' '
+			}
+		else {
+			out += numbers[i]
+			if (document.getElementById('showSuffix').checked) out += suffix
+			out += ' '
+			}
 		}
 	if (debug) console.log(out)
 	return out
 	}
 
 
-function returnAdd (value, llimit, ulimit, tuples) {
+function returnAdd (value, llimit, ulimit, tuples, suffix) {
 	if (value == 0 && tuples[tuples.length-1]['n'] == 0) { return tuples[tuples.length-1]['c']; }
 	if (value > ulimit) return value
 	if (value < llimit) return value
@@ -160,11 +235,12 @@ function returnAdd (value, llimit, ulimit, tuples) {
 			}
 		ptr++;
 		}
-	return str;
+	if (document.getElementById('showSuffix').checked) return str + suffix
+	else return str
 	}
 
 
-function produceAdditive (numList, symbolList, llimit, ulimit) {
+function produceAdditive (numList, symbolList, llimit, ulimit, suffix) {
 	// numList, str, space-separated list of numbers to convert
 	// symbolList, array, integer followed by character for each pair from high to low
 	// limit, int, upper limit of the system
@@ -184,7 +260,7 @@ function produceAdditive (numList, symbolList, llimit, ulimit) {
 		ptr = tuples.length;
 		}
 	for (i=0; i<numbers.length; i++) {
-		out += returnAdd(numbers[i], llimit, ulimit, tuples);
+		out += returnAdd(numbers[i], llimit, ulimit, tuples, suffix);
 		if (i < numbers.length-1) { out += ' '; }
 		}
 	return out;
@@ -192,7 +268,7 @@ function produceAdditive (numList, symbolList, llimit, ulimit) {
 
 
 
-function displayResult (numberlist, result) {
+function displayResult (numberlist, result, suffix) {
 	// takes the result and outputs to the page
 	// numberlist, the original, space-separated sequence of ASCII numbers input by the user
 	// result, space-separated string of numbers in native format

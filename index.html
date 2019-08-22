@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <title>Counter styles converter</title>
-<meta name="description" content="Tool to ascertain whether a UTF8-encoded file on the web has a BOM at the beginning or not." />
-<link rel="stylesheet" type="text/css"href="/style/docs.css" />
-<link rel="stylesheet" type="text/css" href="style.css" />
-<script type="text/javascript" src="/code/boilerplate.js"></script>
-<script type="text/javascript" src="routines.js"></script>
+<meta name="description" content="Produce counter values from CSS-style declarations." />
+<link rel="stylesheet" href="../shared/style/docs.css" />
+<link rel="stylesheet" href="style.css" />
+<script src="../shared/code/boilerplate.js"></script>
+<script src="routines.js"></script>
 </head>
 
 <body class="app">
 <header>
 <div id="header-boilerplate"></div>
-<script>document.getElementById('header-boilerplate').innerHTML = bp_appHeader('/images/world.gif','Counter styles converter','');</script>
+<script>document.getElementById('header-boilerplate').innerHTML = bp_appHeader('../shared/images/world.gif','Counter styles converter','');</script>
 </header>
 
 <aside class="sidebar">
@@ -198,10 +198,11 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decim
   </form>
  
      <p>Or paste the counter-style rule here:<br/>
- <p><textarea class="inputbox"  id="rules" style="width: 80%">Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }</textarea>
+<textarea class="inputbox"  id="rules" style="width: 80%" placeholder="Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }"></textarea>
 <button style="vertical-align:top;" onclick="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('rules').value, document.getElementById('numbers').value))">Convert</button></p>
 
 <p style="margin-top: 3em">Show original numbers in results: <input type="checkbox" checked id="showAscii"/></p>
+<p>Show suffix in results: <input type="checkbox" checked id="showSuffix"/></p>
   <p id="output" style="text-align: left;">&nbsp;</p>
 </div>
 
@@ -240,7 +241,7 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decim
 </div>
 
 <div class="smallprint"><span id="version">First published  24 Jul 2013.  This version <span id="version-info"> 
-<!-- #BeginDate format:IS1m -->2015-02-25  6:30<!-- #EndDate --> 
+<!-- #BeginDate format:IS1m -->2019-08-22  19:12<!-- #EndDate --> 
   </span> GMT. &nbsp;&bull;&nbsp; Copyright <a href="mailto:r12a@w3.org">r12a@w3.org</a>. Licence <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC-By</a>.</span></div>
 </body>
 </html>
