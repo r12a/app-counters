@@ -17,21 +17,56 @@
 </header>
 
 <aside class="sidebar">
-<section>
+<!--section>
   <p style="font-size: 90%;">Counters  can be used  for ordered lists, headings, figures, etc. This page allows you to see what is produced for a given number or sequence of numbers by the algorithms described by <a href="http://www.w3.org/TR/css-counter-styles-3/">CSS3 Counter Styles</a> and <a href="http://www.w3.org/TR/predefined-counter-styles/">Predefined Counter Styles</a>. You can select a defined style from a list, or paste in any counter-styles definition you may have invented.</p>
-</section>
+</section-->
+
+<div id="renderingControls" class="options">
+
+<!--p>Output results vertically: <input type="checkbox" checked id="showVertical"/></p-->
+
+<p class="optionsx" style="margin-top: 3em"><input type="checkbox" checked id="showAscii"/> Show original numbers in results</p>
+
+<p class="optionsx" ><input type="checkbox" checked id="showSuffix"/> Show prefix and/or suffix in results</p>
+
+<p>Font:
+<input id="fontFamily" type="text"  onchange="document.getElementById('counterstyles').style.fontFamily = this.value"></p>
+
+<p>Font size:
+<span style="white-space:nowrap"><input id="fontSizeSlider" type="range" min="10" max="100" step="1" value="30"  oninput="document.getElementById('output').style.fontSize = this.value+'px'; document.getElementById('fontSliderValue').textContent = this.value;"> <span id="fontSliderValue">30</span>px</span></p>
+
+<p>Colour
+<input id="fontColour" type="text" onchange="document.getElementById('output').style.color = this.value"></p>
+
+<p>Line height
+<input id="fontLineHeight" type="range" min=",5" max="3" step=".1" value="1.4"  oninput="document.getElementById('output').style.lineHeight = this.value">
+
+<!--p>Direction
+<input id="direction" type="text" oninput="document.getElementById('output').dir = this.value"></p>
+</p-->
+
+<p>Show as markup: <input type="checkbox"  id="showMarkup"/></p>
+</div>
 </aside>
 
 <div class="section">
-  <form action="none" onsubmit="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('system').value, document.getElementById('numbers').value)); return false;">
-    <p>Type in the numbers you want to convert (separate with spaces):<br/>
-      <input class="inputbox" id="numbers" type="text"/>
+  <form action="none" onsubmit="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('system').value, document.getElementById('numbers').value)); document.getElementById('rules').value = document.getElementById('numbers').value.replace(/\s?;/g,';\n'); return false;">
+    <p>Type in the numbers you want to convert:<br><span style="font-size:smaller;">Separate digits with a space, or use an ASCII hyphen to indicate a range.</span><br/>
+      <input class="inputbox" id="numbers" type="text" placeholder="eg. 1 2 3 5-10 20 100">
     </p>
-    <p>Choose a numbering system:<br/>
-      <select id="system" onchange="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('system').value, document.getElementById('numbers').value)); return false;">
+    <p>Choose a style from a list:<br/>
+      <select id="system" onchange="displayResult( expandNumbers(document.getElementById('numbers').value), parseRule(document.getElementById('system').value, expandNumbers(document.getElementById('numbers').value))); document.getElementById('rules').value = this.value.replace(/\s?;/g,';\n'); 
+      console.log('Expanded numbers:',expandNumbers(document.getElementById('numbers').value));
+      return false;">
+        <option value="system: numeric; symbols: 0 1 2 3 4 5 6 7 8 9;">Select a style</option>
+        <optgroup label="Adlam script">
+        <option value="system: numeric; symbols: 𞥑 𞥒 𞥓 𞥔 𞥕 𞥖 𞥗 𞥘 𞥙 𞥐;">adlam (numeric)</option>
+        </optgroup>
         <optgroup label="Arabic script">
         <option value="system: numeric; symbols: '\660' '\661' '\662' '\663' '\664' '\665' '\666' '\667' '\668' '\669';">arabic-indic (numeric)</option>
-        <option value="system: numeric; symbols: '\6F0' '\6F1' '\6F2' '\6F3' '\6F4' '\6F5' '\6F6' '\6F7' '\6F8' '\6F9';">persian (numeric)</option>
+        <option value="system: fixed; symbols: '\627' '\628' '\62C' '\62F' '\647\200D' '\648' '\632' '\62D' '\637' '\64A' '\643' '\644' '\645' '\646' '\633' '\639' '\641' '\635' '\642' '\631' '\634' '\62A' '\62B' '\62E' '\630' '\636' '\638' '\63A';">arabic-abjad (fixed)</option>
+        <option value="system: fixed; symbols: '\627' '\628' '\62C' '\62F' '\647\200D' '\648' '\632' '\62D' '\637' '\64A' '\643' '\644' '\645' '\646' '\636' '\639' '\641' '\635' '\642' '\631' '\633' '\62A' '\62B' '\62E' '\630' '\638' '\63A' '\634';">maghrebi-abjad (fixed)</option>
+       <option value="system: numeric; symbols: '\6F0' '\6F1' '\6F2' '\6F3' '\6F4' '\6F5' '\6F6' '\6F7' '\6F8' '\6F9';">persian (numeric)</option>
         <option value="system: fixed; symbols: '\627' '\628' '\62C' '\62F' '\647\200D' '\648' '\632' '\62D' '\637' '\6CC' '\6A9' '\644' '\645' '\646' '\633' '\639' '\641' '\635' '\642' '\631' '\634' '\62A' '\62B' '\62E' '\630' '\636' '\638' '\63A';">persian-abjad  (fixed, 1-28)</option>
         <option value="system: fixed; symbols: '\627' '\628' '\67E' '\62A' '\62B' '\62C' '\686' '\62D' '\62E' '\62F' '\630' '\631' '\632' '\698' '\633' '\634' '\635' '\636' '\637' '\638' '\639' '\63A' '\641' '\642' '\6A9' '\6AF' '\644' '\645' '\646' '\648' '\647\200D' '\6CC';">persian-alphabetic  (fixed, 1-32)</option>
         </optgroup>
@@ -45,20 +80,21 @@
         </optgroup>
         <optgroup label="Cyrillic script">
         <option value="system: alphabetic;  symbols: 'а' 'б' 'в' 'г' 'д' 'е' 'ё' 'ж' 'з' 'і' 'й' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ў' 'ф' 'х' 'ц' 'ч' 'ш' 'ы' 'ь' 'э' 'ю' 'я';">lower-belorussian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ё' 'Ж' 'З' 'І' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ў' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Ы' 'Ь' 'Э' 'Ю' 'Я';">upper-belorussian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'е' 'ж' 'з' 'и' 'й' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ф' 'х' 'ц' 'ч' 'ш' 'щ' 'ъ' 'ь' 'ю' 'я';">lower-bulgarian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ж' 'З' 'И' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Ъ' 'Ь' 'Ю' 'Я';">upper-bulgarian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'ѓ' 'е' 'ж' 'з' 'ѕ' 'и' 'ј' 'к' 'л' 'љ' 'м' 'н' 'њ' 'о' 'п' 'р' 'с' 'т' 'ќ' 'у' 'ф' 'х' 'ц' 'ч' 'џ' 'ш';">lower-macedonian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Ѓ' 'Е' 'Ж' 'З' 'Ѕ' 'И' 'Ј' 'К' 'Л' 'Љ' 'М' 'Н' 'Њ' 'О' 'П' 'Р' 'С' 'Т' 'Ќ' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Џ' 'Ш';">upper-macedonian (alphabetic)</option>
+         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'ѓ' 'е' 'ж' 'з' 'ѕ' 'и' 'ј' 'к' 'л' 'љ' 'м' 'н' 'њ' 'о' 'п' 'р' 'с' 'т' 'ќ' 'у' 'ф' 'х' 'ц' 'ч' 'џ' 'ш';">lower-macedonian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'е' 'ж' 'з' 'и' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ф' 'х' 'ц' 'ч' 'ш' 'щ' 'э' 'ю' 'я'; ">lower-russian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ж' 'З' 'И' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Э' 'Ю' 'Я';">upper-russian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'е' 'ё' 'ж' 'з' 'и' 'й' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ф' 'х' 'ц' 'ч' 'ш' 'щ' 'ъ' 'ы' 'ь' 'э' 'ю' 'я';">lower-russian-full (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ё' 'Ж' 'З' 'И' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Ъ' 'Ы' 'Ь' 'Э' 'Ю' 'Я';">upper-russian-full (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'ђ' 'е' 'ж' 'з' 'и' 'ј' 'к' 'л' 'љ' 'м' 'н' 'њ' 'о' 'п' 'р' 'с' 'т' 'ћ' 'у' 'ф' 'х' 'ц' 'ч' 'џ' 'ш';">lower-serbo-croatian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Ђ' 'Е' 'Ж' 'З' 'И' 'Ј' 'К' 'Л' 'Љ' 'М' 'Н' 'Њ' 'О' 'П' 'Р' 'С' 'Т' 'Ћ' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Џ' 'Ш';">upper-serbo-croatian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'д' 'е' 'є' 'ж' 'з' 'и' 'і' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ф' 'х' 'ц' 'ч' 'ш' 'ю' 'я';">lower-ukrainian (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Є' 'Ж' 'З' 'И' 'І' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Ю' 'Я';">upper-ukrainian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'а' 'б' 'в' 'г' 'ґ' 'д' 'е' 'є' 'ж' 'з' 'и' 'і' 'ї' 'й' 'к' 'л' 'м' 'н' 'о' 'п' 'р' 'с' 'т' 'у' 'ф' 'х' 'ц' 'ч' 'ш' 'щ' 'ь' 'ю' 'я';">lower-ukrainian-full (alphabetic)</option>
+        
+       <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ё' 'Ж' 'З' 'І' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ў' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Ы' 'Ь' 'Э' 'Ю' 'Я';">upper-belorussian (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ж' 'З' 'И' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Ъ' 'Ь' 'Ю' 'Я';">upper-bulgarian (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Ѓ' 'Е' 'Ж' 'З' 'Ѕ' 'И' 'Ј' 'К' 'Л' 'Љ' 'М' 'Н' 'Њ' 'О' 'П' 'Р' 'С' 'Т' 'Ќ' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Џ' 'Ш';">upper-macedonian (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ж' 'З' 'И' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Э' 'Ю' 'Я';">upper-russian (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Ё' 'Ж' 'З' 'И' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Ъ' 'Ы' 'Ь' 'Э' 'Ю' 'Я';">upper-russian-full (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Ђ' 'Е' 'Ж' 'З' 'И' 'Ј' 'К' 'Л' 'Љ' 'М' 'Н' 'Њ' 'О' 'П' 'Р' 'С' 'Т' 'Ћ' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Џ' 'Ш';">upper-serbo-croatian (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Д' 'Е' 'Є' 'Ж' 'З' 'И' 'І' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Ю' 'Я';">upper-ukrainian (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'А' 'Б' 'В' 'Г' 'Ґ' 'Д' 'Е' 'Є' 'Ж' 'З' 'И' 'І' 'Ї' 'Й' 'К' 'Л' 'М' 'Н' 'О' 'П' 'Р' 'С' 'Т' 'У' 'Ф' 'Х' 'Ц' 'Ч' 'Ш' 'Щ' 'Ь' 'Ю' 'Я';">upper-ukrainian-full (alphabetic)</option>
         </optgroup>
         <optgroup label="Devanagari script">
@@ -72,6 +108,10 @@
         <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'መ' 'ረ' 'ሰ' 'ሸ' 'በ' 'ቨ' 'ተ' 'ቸ' 'ነ' 'ጀ' 'ገ' 'ጨ' 'ፀ' 'ፐ';">ari (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'ሐ' 'መ' 'ሰ' 'ሸ' 'ረ' 'ቀ' 'ቐ' 'በ' 'ተ' 'ነ' 'ጀ' 'ገ' 'ጘ' 'ጠ' 'ጨ' 'ፈ' 'ቸ' 'ኘ' 'ጸ' 'ጰ' 'ፐ';">blin (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'መ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'በ' 'ተ' 'ቸ' 'ነ' 'ኘ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጸ' 'ፀ' 'ፈ';">dizi (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'ሐ' 'መ' 'ሠ' 'ረ' 'ሰ' 'ቀ' 'በ' 'ተ' 'ኀ' 'ነ' 'አ' 'ከ' 'ወ' 'ዐ' 'ዘ' 'የ' 'ደ' 'ገ' 'ጠ' 'ጰ' 'ጸ' 'ፀ' 'ፈ' 'ፐ'; suffix: '፦ ';">ethiopic-haleme (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'ሐ' 'መ' 'ሠ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'በ' 'ተ' 'ቸ' 'ኀ' 'ነ' 'ኘ' 'አ' 'ከ' 'ኸ' 'ወ' 'ዐ' 'ዘ' 'ዠ' 'የ' 'ደ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጰ' 'ጸ' 'ፀ' 'ፈ' 'ፐ'; suffix: '፦ ';">ethiopic-haleme-am (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'ሐ' 'መ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'ቐ' 'በ' 'ተ' 'ቸ' 'ነ' 'ኘ' 'አ' 'ከ' 'ኸ' 'ወ' 'ዐ' 'ዘ' 'ዠ' 'የ' 'ደ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጰ' 'ጸ' 'ፈ' 'ፐ'; suffix: '፦ ';">ethiopic-haleme-ti-er (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'ሐ' 'መ' 'ሠ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'ቐ' 'በ' 'ተ' 'ቸ' 'ኀ' 'ነ' 'ኘ' 'አ' 'ከ' 'ኸ' 'ወ' 'ዐ' 'ዘ' 'ዠ' 'የ' 'ደ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጰ' 'ጸ' 'ፀ' 'ፈ' 'ፐ'; suffix: '፦ ';">ethiopic-haleme-ti-et (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'መ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'በ' 'ተ' 'ቸ' 'ነ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጰ' 'ጸ' 'ፈ' 'ፐ';">gedeo (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'ሀ' 'ሐ' 'ለ' 'ሐ' 'መ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'በ' 'ቨ' 'ተ' 'ቸ' 'ነ' 'ኘ' 'ገ' 'ጨ' 'ጰ' 'ፀ' 'ፐ';">gumuz (alphabetic)</option>
         <option value="system: alphabetic; symbols: 'ሀ' 'ለ' 'መ' 'ረ' 'ሰ' 'ሸ' 'ቀ' 'በ' 'ተ' 'ቸ' 'ነ' 'ጀ' 'ገ' 'ጠ' 'ጨ' 'ጰ' 'ፈ' 'ፐ';">hadiyya (alphabetic)</option>
@@ -106,51 +146,63 @@
         <optgroup label="Gurmukhi script">
         <option value="system: numeric; symbols: '੦' '੧' '੨' '੩' '੪' '੫' '੬' '੭' '੮' '੯';">gurmukhi (numeric)</option>
         </optgroup>
+        <optgroup label="Hanifi Rohingya script">
+        <option value="system: numeric; symbols: '𐴱' '𐴲' '𐴳' '𐴴' '𐴵' '𐴶' '𐴷' '𐴸' '𐴹' '𐴰';">hanifi rohingya (numeric)</option>
+        </optgroup>
         <optgroup label="Hebrew script">
         <option value="system: additive; range: 1 10999; additive-symbols: 10000 \5D9\5F3, 9000 \5D8\5F3, 8000 \5D7\5F3, 7000 \5D6\5F3, 6000 \5D5\5F3, 5000 \5D4\5F3, 4000 \5D3\5F3, 3000 \5D2\5F3, 2000 \5D1\5F3, 1000 \5D0\5F3, 400 \5EA, 300 \5E9, 200 \5E8, 100 \5E7, 90 \5E6, 80 \5E4, 70 \5E2, 60 \5E1, 50 \5E0, 40 \5DE, 30 \5DC, 20 \5DB, 19 \5D9\5D8, 18 \5D9\5D7, 17 \5D9\5D6, 16 \5D8\5D6, 15 \5D8\5D5, 10 \5D9, 9 \5D8, 8 \5D7, 7 \5D6, 6 \5D5, 5 \5D4, 4 \5D3, 3 \5D2, 2 \5D1, 1 \5D0;">Hebrew (additive, range 1-10999)</option>
         </optgroup>
-        <optgroup label="Ideographic script">
+        <optgroup label="Han & CJK script">
         <option value="simp-chinese-informal">simp-chinese-informal (0-9999)</option>
         <option value="simp-chinese-formal">simp-chinese-formal (0-9999)</option>
         <option value="trad-chinese-informal">trad-chinese-informal (0-9999)</option>
         <option value="trad-chinese-formal">trad-chinese-formal (0-9999)</option>
         <option value="system: numeric; range: 0 infinite;
-symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decimal (numeric)</option>
-        <option value="system: alphabetic; symbols: '子' '丑' '寅' '卯' '辰' '巳' '午' '未' '申' '酉' '戌' '亥';">cjk-earthly-branch (alphabetic)</option>
-        <option value="system: alphabetic; symbols: '甲' '乙' '丙' '丁' '戊' '己' '庚' '辛' '壬' '癸';">cjk-heavenly-stem (alphabetic)</option>
-        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九千, 8000 八千, 7000 七千, 6000 六千, 5000 五千, 4000 四千, 3000 三千, 2000 二千, 1000 千, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 三百, 200 二百, 100 百, 90 九十, 80 八十, 70 七十, 60 六十, 50 五十, 40 四十, 30 三十, 20 二十, 10 十, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 三, 2 二, 1 一, 0 〇;">japanese-informal (additive, range 0-9999)</option>
-        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九阡, 8000 八阡, 7000 七阡, 6000 六阡, 5000 伍阡, 4000 四阡, 3000 参阡, 2000 弐阡, 1000 壱阡, 900 九百, 800 八百, 700 七百, 600 六百, 500 伍百, 400 四百, 300 参百, 200 弐百, 100 壱百, 90 九拾, 80 八拾, 70 七拾, 60 六拾, 50 伍拾, 40 四拾, 30 参拾, 20 弐拾, 10 壱拾, 9 九, 8 八, 7 七, 6 六, 5 伍, 4 四, 3 参, 2 弐, 1 壱, 0 零;">japanese-formal (additive, range 0-9999)</option>
-        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九千, 8000 八千, 7000 七千, 6000 六千, 5000 五千, 4000 四千, 3000 三千, 2000 二千, 1000 千, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 三百, 200 二百, 100 百, 90 九十, 80 八十, 70 七十, 60 六十, 50 五十, 40 四十, 30 三十, 20 二十, 10 十, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 三, 2 二, 1 一, 0 零;">korean-hanja-informal (additive, range 0-9999)</option>
-        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九仟, 8000 八仟, 7000 七仟, 6000 六仟, 5000 五仟, 4000 四仟, 3000 參仟, 2000 貳仟, 1000 壹仟, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 參百, 200 貳百, 100 壹百, 90 九拾, 80 八拾, 70 七拾, 60 六拾, 50 五拾, 40 四拾, 30 參拾, 20 貳拾, 10 壹拾, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 參, 2 貳, 1 壹, 0 零;">korean-hanja-formal (additive, range 0-9999)</option>
-         <option value="system: fixed; symbols: '㊀' '㊁' '㊂' '㊃' '㊄' '㊅' '㊆' '㊇' '㊈' '㊉';">circled-ideograph (fixed)</option>
-         <option value="system: fixed; symbols: '㈠' '㈡' '㈢' '㈣' '㈤' '㈥' '㈦' '㈧' '㈨' '㈩';">parenthesized-ideograph (fixed)</option>
+symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九'; suffix: '、';">cjk-decimal (numeric)</option>
+        <option value="system: fixed; symbols: '子' '丑' '寅' '卯' '辰' '巳' '午' '未' '申' '酉' '戌' '亥'; suffix: '、';">cjk-earthly-branch (fixed, 1-12)</option>
+        <option value="system: fixed; symbols: '甲' '乙' '丙' '丁' '戊' '己' '庚' '辛' '壬' '癸'; suffix: '、';">cjk-heavenly-stem (fixed, 1-10)</option>
+        <option value="system: fixed; symbols: '㊀' '㊁' '㊂' '㊃' '㊄' '㊅' '㊆' '㊇' '㊈' '㊉'; suffix: ' ';">circled-ideograph (fixed, 1-10)</option>
+        <option value="system: fixed; symbols: '㈠' '㈡' '㈢' '㈣' '㈤' '㈥' '㈦' '㈧' '㈨' '㈩'; suffix: ' ';">parenthesized-ideograph (fixed, 1-10)</option>
+        <option value="system: additive; symbols: 5 𝍶, 4 𝍵, 3 𝍴, 2 𝍳, 1 𝍲; suffix: ' ';">cjk-tally-mark (additive)</option>
+        <option value="system: cyclic; symbols: '\7532\5B50' '\4E59\4E11' '\4E19\5BC5' '\4E01\536F' '\620A\8FB0' '\5DF1\5DF3' '\5E9A\5348' '\8F9B\672A' '\58EC\7533' '\7678\9149' '\7532\620C' '\4E59\4EA5' '\4E19\5B50' '\4E01\4E11' '\620A\5BC5' '\5DF1\536F' '\5E9A\8FB0' '\8F9B\5DF3' '\58EC\5348' '\7678\672A' '\7532\7533' '\4E59\9149' '\4E19\620C' '\4E01\4EA5' '\620A\5B50' '\5DF1\4E11' '\5E9A\5BC5' '\8F9B\536F' '\58EC\8FB0' '\7678\5DF3' '\7532\5348' '\4E59\672A' '\4E19\7533' '\4E01\9149' '\620A\620C' '\5DF1\4EA5' '\5E9A\5B50' '\8F9B\4E11' '\58EC\5BC5' '\7678\536F' '\7532\8FB0' '\4E59\5DF3' '\4E19\5348' '\4E01\672A' '\620A\7533' '\5DF1\9149' '\5E9A\620C' '\8F9B\4EA5' '\58EC\5B50' '\7678\4E11' '\7532\5BC5' '\4E59\536F' '\4E19\8FB0' '\4E01\5DF3' '\620A\5348' '\5DF1\672A' '\5E9A\7533' '\8F9B\9149' '\58EC\620C' '\7678\4EA5'; suffix: '、';">cjk-stem-branch (cyclic)</option>
        </optgroup>
         <optgroup label="Japanese script">
-        <option value="system: alphabetic; symbols: 'あ' 'い' 'う' 'え' 'お' 'か' 'き' 'く' 'け' 'こ' 'さ' 'し' 'す' 'せ' 'そ' 'た' 'ち' 'つ' 'て' 'と' 'な' 'に' 'ぬ' 'ね' 'の' 'は' 'ひ' 'ふ' 'へ' 'ほ' 'ま' 'み' 'む' 'め' 'も' 'や' 'ゆ' 'よ' 'ら' 'り' 'る' 'れ' 'ろ' 'わ' 'ゐ' 'ゑ' 'を' 'ん';">hiragana (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'い' 'ろ' 'は' 'に' 'ほ' 'へ' 'と' 'ち' 'り' 'ぬ' 'る' 'を' 'わ' 'か' 'よ' 'た' 'れ' 'そ' 'つ' 'ね' 'な' 'ら' 'む' 'う' 'ゐ' 'の' 'お' 'く' 'や' 'ま' 'け' 'ふ' 'こ' 'え' 'て' 'あ' 'さ' 'き' 'ゆ' 'め' 'み' 'し' 'ゑ' 'ひ' 'も' 'せ' 'す';">hiragana- iroha (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'ア' 'イ' 'ウ' 'エ' 'オ' 'カ' 'キ' 'ク' 'ケ' 'コ' 'サ' 'シ' 'ス' 'セ' 'ソ' 'タ' 'チ' 'ツ' 'テ' 'ト' 'ナ' 'ニ' 'ヌ' 'ネ' 'ノ' 'ハ' 'ヒ' 'フ' 'ヘ' 'ホ' 'マ' 'ミ' 'ム' 'メ' 'モ' 'ヤ' 'ユ' 'ヨ' 'ラ' 'リ' 'ル' 'レ' 'ロ' 'ワ' 'ヰ' 'ヱ' 'ヲ' 'ン';">katakana (alphabetic)</option>
-        <option value="system: alphabetic; symbols: 'イ' 'ロ' 'ハ' 'ニ' 'ホ' 'ヘ' 'ト' 'チ' 'リ' 'ヌ' 'ル' 'ヲ' 'ワ' 'カ' 'ヨ' 'タ' 'レ' 'ソ' 'ツ' 'ネ' 'ナ' 'ラ' 'ム' 'ウ' 'ヰ' 'ノ' 'オ' 'ク' 'ヤ' 'マ' 'ケ' 'フ' 'コ' 'エ' 'テ' 'ア' 'サ' 'キ' 'ユ' 'メ' 'ミ' 'シ' 'ヱ' 'ヒ' 'モ' 'セ' 'ス';">katakana-iroha (alphabetic)</option>
-         <option value="system: fixed; symbols: '㋐' '㋑' '㋒' '㋓' '㋔' '㋕' '㋖' '㋗' '㋘' '㋙' '㋚' '㋛' '㋜' '㋝' '㋞' '㋟' '㋠' '㋡' '㋢' '㋣' '㋤' '㋥' '㋦' '㋧' '㋨' '㋩' '㋪' '㋫' '㋬' '㋭' '㋮' '㋯' '㋰' '㋱' '㋲' '㋳' '㋴' '㋵' '㋶' '㋷' '㋸' '㋹' '㋺' '㋻' '㋼' '㋽' '㋾';">circled-katakana (fixed)</option>
-       </optgroup>
+        <option value="system: alphabetic; symbols: 'あ' 'い' 'う' 'え' 'お' 'か' 'き' 'く' 'け' 'こ' 'さ' 'し' 'す' 'せ' 'そ' 'た' 'ち' 'つ' 'て' 'と' 'な' 'に' 'ぬ' 'ね' 'の' 'は' 'ひ' 'ふ' 'へ' 'ほ' 'ま' 'み' 'む' 'め' 'も' 'や' 'ゆ' 'よ' 'ら' 'り' 'る' 'れ' 'ろ' 'わ' 'ゐ' 'ゑ' 'を' 'ん'; suffix: '、';">hiragana (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'い' 'ろ' 'は' 'に' 'ほ' 'へ' 'と' 'ち' 'り' 'ぬ' 'る' 'を' 'わ' 'か' 'よ' 'た' 'れ' 'そ' 'つ' 'ね' 'な' 'ら' 'む' 'う' 'ゐ' 'の' 'お' 'く' 'や' 'ま' 'け' 'ふ' 'こ' 'え' 'て' 'あ' 'さ' 'き' 'ゆ' 'め' 'み' 'し' 'ゑ' 'ひ' 'も' 'せ' 'す'; suffix: '、';">hiragana- iroha (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ア' 'イ' 'ウ' 'エ' 'オ' 'カ' 'キ' 'ク' 'ケ' 'コ' 'サ' 'シ' 'ス' 'セ' 'ソ' 'タ' 'チ' 'ツ' 'テ' 'ト' 'ナ' 'ニ' 'ヌ' 'ネ' 'ノ' 'ハ' 'ヒ' 'フ' 'ヘ' 'ホ' 'マ' 'ミ' 'ム' 'メ' 'モ' 'ヤ' 'ユ' 'ヨ' 'ラ' 'リ' 'ル' 'レ' 'ロ' 'ワ' 'ヰ' 'ヱ' 'ヲ' 'ン'; suffix: '、';">katakana (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'イ' 'ロ' 'ハ' 'ニ' 'ホ' 'ヘ' 'ト' 'チ' 'リ' 'ヌ' 'ル' 'ヲ' 'ワ' 'カ' 'ヨ' 'タ' 'レ' 'ソ' 'ツ' 'ネ' 'ナ' 'ラ' 'ム' 'ウ' 'ヰ' 'ノ' 'オ' 'ク' 'ヤ' 'マ' 'ケ' 'フ' 'コ' 'エ' 'テ' 'ア' 'サ' 'キ' 'ユ' 'メ' 'ミ' 'シ' 'ヱ' 'ヒ' 'モ' 'セ' 'ス'; suffix: '、';">katakana-iroha (alphabetic)</option>
+         <option value="system: fixed; symbols: '㋐' '㋑' '㋒' '㋓' '㋔' '㋕' '㋖' '㋗' '㋘' '㋙' '㋚' '㋛' '㋜' '㋝' '㋞' '㋟' '㋠' '㋡' '㋢' '㋣' '㋤' '㋥' '㋦' '㋧' '㋨' '㋩' '㋪' '㋫' '㋬' '㋭' '㋮' '㋯' '㋰' '㋱' '㋲' '㋳' '㋴' '㋵' '㋶' '㋷' '㋸' '㋹' '㋺' '㋻' '㋼' '㋽' '㋾'; suffix: ' ';">circled-katakana (fixed, 1-47)</option>
+        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九千, 8000 八千, 7000 七千, 6000 六千, 5000 五千, 4000 四千, 3000 三千, 2000 二千, 1000 千, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 三百, 200 二百, 100 百, 90 九十, 80 八十, 70 七十, 60 六十, 50 五十, 40 四十, 30 三十, 20 二十, 10 十, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 三, 2 二, 1 一, 0 〇; suffix: 、;">japanese-informal (additive, range 0-9999)</option>
+        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九阡, 8000 八阡, 7000 七阡, 6000 六阡, 5000 伍阡, 4000 四阡, 3000 参阡, 2000 弐阡, 1000 壱阡, 900 九百, 800 八百, 700 七百, 600 六百, 500 伍百, 400 四百, 300 参百, 200 弐百, 100 壱百, 90 九拾, 80 八拾, 70 七拾, 60 六拾, 50 伍拾, 40 四拾, 30 参拾, 20 弐拾, 10 壱拾, 9 九, 8 八, 7 七, 6 六, 5 伍, 4 四, 3 参, 2 弐, 1 壱, 0 零; suffix: 、;">japanese-formal (additive, range 0-9999)</option>
+        </optgroup>
+        
         <optgroup label="Kannada script">
         <option value="system: numeric; symbols: '೦' '೧' '೨' '೩' '೪' '೫' '೬' '೭' '೮' '೯';">kannada (numeric)</option>
         </optgroup>
+        
         <optgroup label="Khmer script">
-        <option value="system: numeric; symbols: '០' '១' '២' '៣' '៤' '៥' '៦' '៧' '៨' '៩';">khmer (numeric)</option>
-        <option value="system: alphabetic; symbols: 'ក' 'ខ' 'គ' 'ឃ' 'ង' 'ច' 'ឆ' 'ជ' 'ឈ' 'ញ' 'ដ' 'ឋ' 'ឌ' 'ឍ' 'ណ' 'ត' 'ថ' 'ទ' 'ធ' 'ន' 'ប' 'ផ' 'ព' 'ភ' 'ម' 'យ' 'រ' 'ល' 'វ' 'ស' 'ហ' 'ឡ' 'អ';">cambodian-consonant (alphabetic)</option>
+        <option value="system: numeric; symbols: '០' '១' '២' '៣' '៤' '៥' '៦' '៧' '៨' '៩';">khmer/cambodian (numeric)</option>
+        <option value="system: alphabetic; symbols: 'ក' 'ខ' 'គ' 'ឃ' 'ង' 'ច' 'ឆ' 'ជ' 'ឈ' 'ញ' 'ដ' 'ឋ' 'ឌ' 'ឍ' 'ណ' 'ត' 'ថ' 'ទ' 'ធ' 'ន' 'ប' 'ផ' 'ព' 'ភ' 'ម' 'យ' 'រ' 'ល' 'វ' 'ស' 'ហ' 'ឡ' 'អ';">khmer-consonant (alphabetic)</option>
         </optgroup>
+        
         <optgroup label="Korean hangul script">
         <option value="system: additive; range: -9999 9999; additive-symbols: 9000 '구천', 8000 '팔천', 7000 '칠천', 6000 '육천', 5000 '오천', 4000 '사천', 3000 '삼천', 2000 '이천', 1000 '일천', 900 '구백', 800 '팔백', 700 '칠백', 600 '육백', 500 '오백', 400 '사백', 300 '삼백', 200 '이백', 100 '일백', 90 '구십', 80 '팔십', 70 '칠십', 60 '육십', 50 '오십', 40 '사십', 30 '삼십', 20 '이십', 10 '일십', 9 '구', 8 '팔', 7 '칠', 6 '육', 5 '오', 4 '사', 3 '삼', 2 '이', 1 '일', 0 '영';">korean-hangul-formal (additive, range 0-9999)</option>
-        <option value="system: fixed; symbols: '㉠' '㉡' '㉢' '㉣' '㉤' '㉥' '㉦' '㉧' '㉨' '㉩' '㉪' '㉫' '㉬' '㉭';">korean-circled-consonant (fixed, 1-14)</option>
-        <option value="system: fixed; symbols: '㉮' '㉯' '㉰' '㉱' '㉲' '㉳' '㉴' '㉵' '㉶' '㉷' '㉸' '㉹' '㉺' '㉻';">korean-circled-syllable (fixed, 1-14)</option>
+        <option value="system: alphabetic; symbols: '가' '나' '다' '라' '마' '바' '사' '아' '자' '차' '카' '타' '파' '하';">hangul (alphabetic)</option>
+        <option value="system: alphabetic; symbols: 'ㄱ' 'ㄴ' 'ㄷ' 'ㄹ' 'ㅁ' 'ㅂ' 'ㅅ' 'ㅇ' 'ㅈ' 'ㅊ' 'ㅋ' 'ㅌ' 'ㅍ' 'ㅎ';">hangul-consonant (alphabetic)</option>
+        <option value="system: fixed; symbols: '㉠' '㉡' '㉢' '㉣' '㉤' '㉥' '㉦' '㉧' '㉨' '㉩' '㉪' '㉫' '㉬' '㉭'; suffix: ' ';">korean-circled-consonant (fixed, 1-14)</option>
+        <option value="system: fixed; symbols: '㉮' '㉯' '㉰' '㉱' '㉲' '㉳' '㉴' '㉵' '㉶' '㉷' '㉸' '㉹' '㉺' '㉻'; suffix: ' ';">korean-circled-syllable (fixed, 1-14)</option>
         <option value="system: alphabetic; symbols: 'ㄱ' 'ㄴ' 'ㄷ' 'ㄹ' 'ㅁ' 'ㅂ' 'ㅅ' 'ㅇ' 'ㅈ' 'ㅊ' 'ㅋ' 'ㅌ' 'ㅍ' 'ㅎ';">korean-consonant (alphabetic)</option>
         <option value="system: alphabetic; symbols: '가' '나' '다' '라' '마' '바' '사' '아' '자' '차' '카' '타' '파' '하';">korean-syllable (alphabetic)</option>
         <option value="system: fixed; symbols: '㈀' '㈁' '㈂' '㈃' '㈄' '㈅' '㈆' '㈇' '㈈' '㈉' '㈊' '㈋' '㈌' '㈍';">korean-parenthesized-consonant (fixed, 1-14)</option>
         <option value="system: fixed; symbols: '㈎' '㈏' '㈐' '㈑' '㈒' '㈓' '㈔' '㈕' '㈖' '㈗' '㈘' '㈙' '㈚';">korean-parenthesized-syllable (fixed, 1-14)</option>
+        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九千, 8000 八千, 7000 七千, 6000 六千, 5000 五千, 4000 四千, 3000 三千, 2000 二千, 1000 千, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 三百, 200 二百, 100 百, 90 九十, 80 八十, 70 七十, 60 六十, 50 五十, 40 四十, 30 三十, 20 二十, 10 十, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 三, 2 二, 1 一, 0 零;">korean-hanja-informal (additive, range 0-9999)</option>
+        <option value="system: additive; range: -9999 9999; additive-symbols: 9000 九仟, 8000 八仟, 7000 七仟, 6000 六仟, 5000 五仟, 4000 四仟, 3000 參仟, 2000 貳仟, 1000 壹仟, 900 九百, 800 八百, 700 七百, 600 六百, 500 五百, 400 四百, 300 參百, 200 貳百, 100 壹百, 90 九拾, 80 八拾, 70 七拾, 60 六拾, 50 五拾, 40 四拾, 30 參拾, 20 貳拾, 10 壹拾, 9 九, 8 八, 7 七, 6 六, 5 五, 4 四, 3 參, 2 貳, 1 壹, 0 零;">korean-hanja-formal (additive, range 0-9999)</option>
         </optgroup>
+        
         <optgroup label="Lao script">
         <option value="system: numeric; symbols: '໐' '໑' '໒' '໓' '໔' '໕' '໖' '໗' '໘' '໙';">lao (numeric)</option>
         </optgroup>
+        
         <optgroup label="Latin script">
         <option value="system: additive; range: 1 3999; additive-symbols: 1000 'm', 900 'cm', 500 'd', 400 'cd', 100 'c', 90 'xc', 50 'l', 40 'xl', 10 'x', 9 'ix', 5 'v', 4 'iv', 1 'i';">lower-roman (additive, range 1-3999)</option>
         <option value="system: additive; range: 1 3999; additive-symbols: 1000 'M', 900 'CM', 500 'D', 400 'CD', 100 'C', 90 'XC', 50 'L', 40 'XL', 10 'X', 9 'IX', 5 'V', 4 'IV', 1 'I';">upper-roman (additive, range 1-3999)</option>
@@ -161,57 +213,123 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decim
         <option value="system: alphabetic; symbols: 'A' 'AA' 'B' 'C' 'D' 'E' 'EE' 'F' 'G' 'H' 'I' 'II' 'J' 'K' 'L' 'M' 'N' 'O' 'OO' 'P' 'Q' 'R' 'S' 'T' 'U' 'UU' 'V' 'W' 'X' 'Y' 'Z' 'CH' 'DH' 'KH' 'NY' 'PH' 'SH';">upper-oromo-qubee (alphabetic)</option>
         <option value="system: fixed; symbols: '⒜' '⒝' '⒞' '⒟' '⒠' '⒡' '⒢' '⒣' '⒤' '⒥' '⒦' '⒧' '⒨' '⒩' '⒪' '⒫' '⒬' '⒭' '⒮' '⒯' '⒰' '⒱' '⒲' '⒳' '⒴' '⒵';">parenthesized-lower-latin (fixed, 1-26)</option>
         </optgroup>
+        
         <optgroup label="Lepcha script">
         <option value="system: numeric; symbols: '\1C40' '\1C41' '\1C42' '\1C43' '\1C44' '\1C45' '\1C46' '\1C47' '\1C48' '\1C49';">lepcha (numeric)</option>
         </optgroup>
+        
         <optgroup label="Malayalam script">
         <option value="system: numeric; symbols: '\D66' '\D67' '\D68' '\D69' '\D6A' '\D6B' '\D6C' '\D6D' '\D6E' '\D6F';">malayalam (numeric)</option>
         </optgroup>
+        
+        <optgroup label="Meetei script">
+        <option value="system: numeric; symbols: '꯰' '꯱' '꯲' '꯳' '꯴' '꯵' '꯶' '꯷' '꯸' '꯹'; suffix: ') ';">meetei (numeric)</option>
+        </optgroup>
+        
         <optgroup label="Mongolian script">
         <option value="system: numeric; symbols: '\1810' '\1811' '\1812' '\1813' '\1814' '\1815' '\1816' '\1817' '\1818' '\1819';">mongolian (numeric)</option>
         </optgroup>
+        
         <optgroup label="Myanmar script">
-        <option value="system: numeric; symbols: '\1040' '\1041' '\1042' '\1043' '\1044' '\1045' '\1046' '\1047' '\1048' '\1049';">burmese/myanmar (numeric)</option>
+        <option value="system: alphabetic; symbols: '\1000' '\1001' '\1002' '\1003' '\1004' '\1005' '\1006' '\1007' '\1008' '\100A' '\100B' '\100C' '\100D' '\100E' '\100F' '\1010' '\1011' '\1012' '\1013' '\1014' '\1015' '\1016' '\1017' '\1018' '\1019' '\101A' '\101B' '\101C' '\101D' '\101E' '\101F' '\1020' '\1021'; prefix: '\0028'; suffix: '\0029\0020';">burmese consonant (alphabetic)</option>
+        <option value="system: numeric; symbols: '\1040' '\1041' '\1042' '\1043' '\1044' '\1045' '\1046' '\1047' '\1048' '\1049'; prefix: '('; suffix: ') ';">burmese/myanmar (numeric)</option>
+        <option value="system: numeric; symbols: '\1040' '\1041' '\1042' '\1043' '\1044' '\1045' '\1046' '\1047' '\1048' '\1049'; suffix: '။ ';">burmese/myanmar-msm (numeric)</option>
         <option value="system: numeric; symbols: '\1090' '\1091' '\1092' '\1093' '\1094' '\1095' '\1096' '\1097' '\1098' '\1099';">shan (numeric)</option>
         </optgroup>
+        
+        <optgroup label="Ol Chiki script">
+        <option value="system: numeric; symbols: '᱐' '᱑' '᱒' '᱓' '᱔' '᱕' '᱖' '᱗' '᱘' '᱙';">santali (numeric)</option>
+        </optgroup>
+        
         <optgroup label="Oriya script">
         <option value="system: numeric; symbols: '\B66' '\B67' '\B68' '\B69' '\B6A' '\B6B' '\B6C' '\B6D' '\B6E' '\B6F';">oriya (numeric)</option>
         </optgroup>
+        
         <optgroup label="Syriac script">
         <option value="system: additive; range: 1 9999999; additive-symbols: 9000000 'ܛܸ', 8000000 'ܚܸ', 7000000 'ܙܸ', 6000000 'ܘܸ', 5000000 'ܗܸ', 4000000 'ܕܸ', 3000000 'ܓܸ', 2000000 'ܒܸ', 1000000 'ܐܸ', 900000 'ܛ̤', 800000 'ܚ̤', 700000 'ܙ̤', 600000 'ܘ̤', 500000 'ܗ̤', 400000 'ܕ̤', 300000 'ܓ̤', 200000 'ܒ̤', 100000 'ܐ̤', 90000 'ܛ̱', 80000 'ܚ̱', 70000 'ܙ̱', 60000 'ܘ̱', 50000 'ܗ̱', 40000 'ܕ̱', 30000 'ܓ̱', 20000 'ܒ̱', 10000 'ܐ̱', 9000 'ܛ݇', 8000 'ܚ݇', 7000 'ܙ݇', 6000 'ܘ݇', 5000 'ܗ݇', 4000 'ܕ݇', 3000 'ܓ݇', 2000 'ܒ݇', 1000 'ܐ݇', 900 'ܨ݁', 800 'ܦ݁', 700 'ܥ݁', 600 'ܣ݁', 500 'ܢ݁', 400 'ܬ', 300 'ܫ', 200 'ܪ', 100 'ܩ', 90 'ܨ', 80 'ܦ', 70 'ܥ', 60 'ܣ', 50 'ܢ', 40 'ܡ', 30 'ܠ', 20 'ܟ', 10 'ܝ', 9 'ܛ', 8 'ܚ', 7 'ܙ', 6 'ܘ', 5 'ܗ', 4 'ܕ', 3 'ܓ', 2 'ܒ', 1 'ܐ';">assyrian (additive, range 1-9,999,999)</option>
+        
         </optgroup>
 		<optgroup label="Tamil script">
         <option value="system: numeric; symbols: '\BE6' '\BE7' '\BE8' '\BE9' '\BEA' '\BEB' '\BEC' '\BED' '\BEE' '\BEF';">tamil (numeric)</option>
         <option value="system: additive; range: 1 9999; additive-symbols: 9000 '\BEF\BF2', 8000 '\BEE\BF2', 7000 '\BED\BF2', 6000 '\BEC\BF2', 5000 '\BEB\BF2', 4000 '\BEA\BF2', 3000 '\BE9\BF2', 2000 '\BE8\BF2', 1000 '\BF2', 900 '\BEF\BF1', 800 '\BEE\BF1', 700 '\BED\BF1', 600 '\BEC\BF1', 500 '\BEB\BF1', 400 '\BEA\BF1', 300 '\BE9\BF1', 200 '\BE8\BF1', 100 '\BF1', 90 '\BEF\BF0', 80 '\BEE\BF0', 70 '\BED\BF0', 60 '\BEC\BF0', 50 '\BEB\BF0', 40 '\BEA\BF0', 30 '\BE9\BF0', 20 '\BE8\BF0', 10 '\BF0', 9 '\BEF', 8 '\BEE', 7 '\BED', 6 '\BEC', 5 '\BEB', 4 '\BEA', 3 '\BE9', 2 '\BE8', 1 '\BE7';">Tamil, ancient (additive, range 1-9999)</option>
         </optgroup>
+        
         <optgroup label="Telugu script">
         <option value="system: numeric; symbols: '\C66' '\C67' '\C68' '\C69' '\C6A' '\C6B' '\C6C' '\C6D' '\C6E' '\C6F';">telugu (numeric)</option>
         </optgroup>
+        
         <optgroup label="Thai script">
         <option value="system: numeric; symbols: '\E50' '\E51' '\E52' '\E53' '\E54' '\E55' '\E56' '\E57' '\E58' '\E59';">thai (numeric)</option>
         <option value="system: alphabetic; symbols: '\E01' '\E02' '\E04' '\E07' '\E08' '\E09' '\E0A' '\E0B' '\E0C' '\E0D' '\E0E' '\E0F' '\E10' '\E11' '\E12' '\E13' '\E14' '\E15' '\E16' '\E17' '\E18' '\E19' '\E1A' '\E1B' '\E1C' '\E1D' '\E1E' '\E1F' '\E20' '\E21' '\E22' '\E23' '\E25' '\E27' '\E28' '\E29' '\E2A' '\E2B' '\E2C' '\E2D' '\E2E';">thai-alphabetic (alphabetic)</option>
         </optgroup>
+        
         <optgroup label="Tibetan script">
         <option value="system: numeric; symbols: '\F20' '\F21' '\F22' '\F23' '\F24' '\F25' '\F26' '\F27' '\F28' '\F29';">tibetan (numeric)</option>
         </optgroup>
       </select>
-      &nbsp;&nbsp;
-      <button type="submit">Convert</button>
+      <!--&nbsp;&nbsp;
+      <button type="submit">Convert</button-->
     </p>
   </form>
  
      <p>Or paste the counter-style rule here:<br/>
-<textarea class="inputbox"  id="rules" style="width: 80%" placeholder="Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }"></textarea>
-<button style="vertical-align:top;" onclick="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('rules').value, document.getElementById('numbers').value))">Convert</button></p>
+<textarea class="inputbox"  id="rules" style="width: 80%" placeholder="Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }"></textarea><br>
+<button style="vertical-align:top;" onclick="displayResult( expandNumbers(document.getElementById('numbers').value), parseRule(document.getElementById('rules').value, expandNumbers(document.getElementById('numbers').value)))">Convert</button></p>
 
-<p style="margin-top: 3em">Show original numbers in results: <input type="checkbox" checked id="showAscii"/></p>
-<p>Show suffix in results: <input type="checkbox" checked id="showSuffix"/></p>
-  <p id="output" style="text-align: left;">&nbsp;</p>
+<!--p class="options" style="margin-top: 3em">Show original numbers in results: <input type="checkbox" checked id="showAscii"/></p>
+<p class="options" >Show prefix and/or suffix in results: 
+<input type="checkbox" checked id="showSuffix"/></p-->
+
+
+
+<div id="output" dir="auto" style="text-align: start;">&nbsp;</div>
 </div>
 
 
 
-<div id="showNotes"  style="margin-left: 7.5%"  onclick="toggleNotes()">show notes</div>
+
+<div id="notes" style=" background-color: bisque; margin-top:4em; padding: 1em; ">
+
+<p style="font-size: 90%;">Counters  can be used  for ordered lists, headings, figures, etc. This page allows you to see what is produced for a given number or sequence of numbers by the algorithms described by <a href="http://www.w3.org/TR/css-counter-styles-3/">CSS3 Counter Styles</a> and <a href="http://www.w3.org/TR/predefined-counter-styles/">Ready-made Counter Styles</a>. You can select a defined style from a list, or paste in any counter-styles definition you may have invented.</p>
+
+
+<details>
+<summary>show more</summary>
+
+<aside class="sidebar">
+  <div class="section">
+  <h2 class="flush">Related links</h2>
+    <p><a target="_blank" href="http://www.w3.org/TR/css-counter-styles-3/">CSS3 Counter Styles</a></p>
+    <p><a target="_blank" href="http://www.w3.org/TR/predefined-counter-styles/">Ready-made Counter Styles</a></p>
+  </div>
+</aside>
+
+
+<section>
+  <p>Start by adding a list of numbers to the top box. Numbers should be separated by a space. However, you can specify a range of numbers such as <samp>8-12</samp>, and this will be expanded in the output. You can mix any number of numbers and ranges.</p>
+  <p>You can choose a style from the list, which includes all styles in the <span style="font-size: 90%;"><a href="http://www.w3.org/TR/predefined-counter-styles/">Ready-made Counter Styles</a></span> document. The list will be updated so that it remains current with that document. Choosing from the list will insert the CSS code for that style in the next box down. You can then tweak those style rules, if you want (eg. to try out different affixes).</p>
+<p>Alternatively, you can type a rule directly into that box.</p>
+<p>The side bar options allow you to configure the output.</p>
+<p style="font-size: 80%;"><samp>Show as markup</samp> is not intended for general use.</p>
+</section>
+
+<p id="status">Updated 
+<!-- #BeginDate format:Sw1 -->29 June, 2021<!-- #EndDate -->
+</p>
+</details>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!--div id="showNotes"  style="margin-left: 7.5%"  onclick="toggleNotes()">show notes</div>
 
 <div id="detailednotes" style="display:none">
   <p><strong>Notes:</strong></p> 
@@ -224,7 +342,7 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decim
   </div>
 </aside>
 
-<p id="status">Updated Fri 20 Feb 2015  &bull; tags <a href="http://rishida.net/blog/index.php?tag=counterstyles" title="Show all blog posts tagged with 'counterstyles'">counterstyles</a>, <a href="http://rishida.net/blog/?tag=scriptnotes" title="Show all blog posts tagged with 'scriptnotes'">scriptnotes</a>, <a href="http://rishida.net/blog/?tag=apps" title="Show all blog posts tagged with 'apps'">apps</a></p>
+<p id="status">Updated Fri 20 Feb 2015  &bull; tags <a href="http://r12a.github.io/blog/index.php?tag=counterstyles" title="Show all blog posts tagged with 'counterstyles'">counterstyles</a>, <a href="http://r12a.github.io/blog/?tag=scriptnotes" title="Show all blog posts tagged with 'scriptnotes'">scriptnotes</a>, <a href="http://r12a.github.io/blog/?tag=apps" title="Show all blog posts tagged with 'apps'">apps</a></p>
 
 <section>
   <p>This page allows you to convert ASCII numbers into other representations that can be used for counters for ordered lists, headings, figures, etc. It uses the algorithms described by <a href="http://www.w3.org/TR/css-counter-styles-3/">CSS3 Counter Styles</a> and <a href="http://www.w3.org/TR/predefined-counter-styles/">Predefined Counter Styles</a>, but doesn't yet cover negative numbers, and outside the ranges defined in Counter Styles no fallback is applied other than to ASCII digits.</p>
@@ -241,10 +359,11 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九';">cjk-decim
   <p><strong>Fixed</strong> styles are just a single sequence of characters, and therefore the range is quite limited. For example, there are only twenty filled-circle numbers in Unicode, and so you only see a result for  numbers between 1 and 20 (eg. ❶, ❷, ❸, ❹ ... ⓳, ⓴).</p>
 </section>
 
-</div>
+</div-->
+
 
 <div class="smallprint"><span id="version">First published  24 Jul 2013.  This version <span id="version-info"> 
-<!-- #BeginDate format:IS1m -->2020-03-29  17:58<!-- #EndDate --> 
+<!-- #BeginDate format:IS1m -->2021-06-29  20:05<!-- #EndDate --> 
   </span> GMT. &nbsp;&bull;&nbsp; Copyright <a href="mailto:r12a@w3.org">r12a@w3.org</a>. Licence <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC-By</a>.</span></div>
 </body>
 </html>

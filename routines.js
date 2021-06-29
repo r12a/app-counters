@@ -1,4 +1,4 @@
-var debug = false
+var debug = true
 
 function hex2char ( hex ) {
 	// converts a single hex number to a character
@@ -29,14 +29,36 @@ function convertCSS2Char ( str ) {
 
 
 
+function expandNumbers (nums) {
+    // takes a list of space-separated numbers and expands any numbers separated by hyphens
+    console.log('Nums:',nums)
+    numArray = nums.split(' ')
+    out = ''
+    for (i=0;i<numArray.length;i++) {
+        if (numArray[i].includes('-')) {
+            startEnd = numArray[i].split('-')
+            console.log('startend',startEnd)
+            for (n=parseInt(startEnd[0]);n<parseInt(startEnd[1])+1;n++) {
+                out += ' '+n
+                }
+            }
+        else out += ' '+numArray[i]
+        }
+    return out.trim()
+    }
+
+
+
+
 function parseRule (rule, numbers) {
-	// figures out the sytem and symbols and selects the appropriate processing algorithm
+	// figures out the system and symbols and selects the appropriate processing algorithm
 	// returns a space-separated list of numbers
 	
 	// tidy the input
 	numbers = numbers.replace(/\s+/g,' ').trim()
-	
-	// deal with the special algorithms
+    rule = convertCSS2Char(rule)
+
+    // deal with the special algorithms
 	if (rule == 'ethiopic-numeric') return doEthiopicNumeric(numbers)
 	if (rule == 'simp-chinese-formal') return simpchineseformal(numbers)
 	if (rule == 'simp-chinese-informal') return simpchineseinformal(numbers)
@@ -57,7 +79,7 @@ function parseRule (rule, numbers) {
 	if (symbolMatch==null) { alert('Symbols not found. (Check you added a semi-colon after.)'); return numbers }
 	else {
 		symbolList = symbolMatch[1]
-		symbolList = convertCSS2Char(symbolList)
+		//symbolList = convertCSS2Char(symbolList)
 		symbolList = symbolList.replace(/'|,|"/g,' ').replace(/[\s]+/g,' ').trim()
 		symbolArray = symbolList.split(' ')
 		if (debug) console.log('symbolList',symbolList, 'symbolArray',symbolArray)
@@ -82,24 +104,53 @@ function parseRule (rule, numbers) {
 	// identify the suffix
 	var suffix = ''
 	//suffix = rule.match(/suffix:[\s]*([^\s]+)[\s]*;/)
-	suffix = rule.match(/suffix:([^;]+);/)
+	suffix = rule.match(/suffix:\s*([^;]+);/)
 	if (suffix !== null) {
-		suffix = suffix[1]
+		suffix = suffix[1].trim()
+        suffix = suffix.replace(/ /g,'␣')
 		suffix = suffix.replace(/'|"/g, '').trim()
-		suffix = convertCSS2Char(suffix)
+		//suffix = convertCSS2Char(suffix)
 		}
 	else {
-		console.log('No suffix.')
-		suffix = ''
+		console.log('Default suffix.')
+		suffix = '.␣'
 		}
 	
+	// identify the prefix
+	var prefix = ''
+	prefix = rule.match(/prefix:\s*([^;]+);/)
+	if (prefix !== null) {
+		prefix = prefix[1].trim()
+        prefix = prefix.replace(/ /g,'␣')
+		prefix = prefix.replace(/'|"/g, '').trim()
+		//prefix = convertCSS2Char(prefix)
+		}
+	else {
+		console.log('No prefix.')
+		prefix = ''
+		}
+
+
+/* OLD
+	var prefix = ''
+	prefix = rule.match(/prefix:\s*([^;]+);/)
+	if (prefix !== null) {
+		prefix = prefix[1]
+		prefix = prefix.replace(/'|"/g, '').trim()
+		prefix = convertCSS2Char(prefix)
+		}
+	else {
+		console.log('No prefix.')
+		prefix = ''
+		}
+*/
 	
 	switch (ruleType) {
-		case 'cyclic': return produceCyclic(numbers, symbolArray, suffix); break
-		case 'numeric': return produceNumeric(numbers, symbolArray, suffix); break
-		case 'alphabetic': return produceAlphabetic(numbers, symbolArray, suffix); break
-		case 'fixed': return produceFixed(numbers, symbolArray, suffix); break
-		case 'additive': return produceAdditive(numbers, symbolArray, lowerLimit, upperLimit, suffix); break
+		case 'cyclic': return produceCyclic(numbers, symbolArray, suffix, prefix); break
+		case 'numeric': return produceNumeric(numbers, symbolArray, suffix, prefix); break
+		case 'alphabetic': return produceAlphabetic(numbers, symbolArray, suffix, prefix); break
+		case 'fixed': return produceFixed(numbers, symbolArray, suffix, prefix); break
+		case 'additive': return produceAdditive(numbers, symbolArray, lowerLimit, upperLimit, suffix, prefix); break
 		}
 	}
 
@@ -107,7 +158,7 @@ function parseRule (rule, numbers) {
 
 
 
-function produceCyclic (numList, symbolList, suffix) {
+function produceCyclic (numList, symbolList, suffix, prefix) {
 	// for each of the items in the input, generate a counter
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
@@ -126,6 +177,7 @@ function produceCyclic (numList, symbolList, suffix) {
 		if (isNaN(num)) value = numbers[n]
 		else if (num <= 0)  value = numbers[n]
 		else value = symbolList[(num-1) % base]
+		if (document.getElementById('showSuffix').checked) out += prefix
 		out += value
 		if (document.getElementById('showSuffix').checked) out += suffix
 		out += ' '
@@ -135,7 +187,7 @@ function produceCyclic (numList, symbolList, suffix) {
 	}
 
 
-function produceNumeric (numList, symbolList, suffix) {
+function produceNumeric (numList, symbolList, suffix, prefix) {
 	// for each of the items in the input, generate a counter
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
@@ -144,6 +196,7 @@ function produceNumeric (numList, symbolList, suffix) {
 	numList = numList.replace(/[\s]+/g,' ').trim()
 	var numbers = numList.split(' ')
 
+	// check for negative numbers
 	var ok = true
 	for (let i=0;i<numbers.length;i++) if (parseInt(numbers[i]) < 0) ok = false
 	if (! ok) alert('Unable to handle negative numbers in the numeric system.')
@@ -159,16 +212,17 @@ function produceNumeric (numList, symbolList, suffix) {
 				numbers[n] = Math.floor(numbers[n]/base)
 				}
 			}
+		if (document.getElementById('showSuffix').checked) out += prefix
 		out += value
 		if (document.getElementById('showSuffix').checked) out += suffix
 		out += ' '
 		}
-	if (debug) console.log(out)
+	if (debug) console.log('produceNumeric out',out)
 	return out
 	}
 
 
-function produceAlphabetic (numList, symbolList, suffix) {
+function produceAlphabetic (numList, symbolList, suffix, prefix) {
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
 	
@@ -187,6 +241,7 @@ function produceAlphabetic (numList, symbolList, suffix) {
 				}
 			}
 		else S = value
+		if (document.getElementById('showSuffix').checked) out += prefix
 		out += S
 		if (document.getElementById('showSuffix').checked) out += suffix
 		out += ' '
@@ -195,7 +250,7 @@ function produceAlphabetic (numList, symbolList, suffix) {
 	return out
 	}
 
-function produceFixed (numList, symbolList, suffix) {
+function produceFixed (numList, symbolList, suffix, prefix) {
 	// numList, space-separated list of ascii numbers to convert
 	// symbolList, array of symbols
 
@@ -205,11 +260,13 @@ function produceFixed (numList, symbolList, suffix) {
 	var N = symbolList.length
 	for (i=0; i<numbers.length; i++) {
 		if (numbers[i] <= N && numbers[i] > 0) {
+			if (document.getElementById('showSuffix').checked) out += prefix
 			out += symbolList[numbers[i]-1]
 			if (document.getElementById('showSuffix').checked) out += suffix
 			out += ' '
 			}
 		else {
+			if (document.getElementById('showSuffix').checked) out += prefix
 			out += numbers[i]
 			if (document.getElementById('showSuffix').checked) out += suffix
 			out += ' '
@@ -220,7 +277,7 @@ function produceFixed (numList, symbolList, suffix) {
 	}
 
 
-function returnAdd (value, llimit, ulimit, tuples, suffix) {
+function returnAdd (value, llimit, ulimit, tuples, suffix, prefix) {
 	if (value == 0 && tuples[tuples.length-1]['n'] == 0) { return tuples[tuples.length-1]['c']; }
 	if (value > ulimit) return value
 	if (value < llimit) return value
@@ -235,12 +292,12 @@ function returnAdd (value, llimit, ulimit, tuples, suffix) {
 			}
 		ptr++;
 		}
-	if (document.getElementById('showSuffix').checked) return str + suffix
+	if (document.getElementById('showSuffix').checked) return prefix + str + suffix
 	else return str
 	}
 
 
-function produceAdditive (numList, symbolList, llimit, ulimit, suffix) {
+function produceAdditive (numList, symbolList, llimit, ulimit, suffix, prefix) {
 	// numList, str, space-separated list of numbers to convert
 	// symbolList, array, integer followed by character for each pair from high to low
 	// limit, int, upper limit of the system
@@ -260,35 +317,58 @@ function produceAdditive (numList, symbolList, llimit, ulimit, suffix) {
 		ptr = tuples.length;
 		}
 	for (i=0; i<numbers.length; i++) {
-		out += returnAdd(numbers[i], llimit, ulimit, tuples, suffix);
+		out += returnAdd(numbers[i], llimit, ulimit, tuples, suffix, prefix);
 		if (i < numbers.length-1) { out += ' '; }
 		}
 	return out;
 	}
 
 
+// displayResult( 
+//      expandNumbers(document.getElementById('numbers').value), 
+//      parseRule(document.getElementById('rules').value, expandNumbers(document.getElementById('numbers').value)))
 
-function displayResult (numberlist, result, suffix) {
+function displayResult (numberlist, result) {
 	// takes the result and outputs to the page
 	// numberlist, the original, space-separated sequence of ASCII numbers input by the user
 	// result, space-separated string of numbers in native format
-	
+	var numbers, results
+    
 	numberlist = numberlist.replace(/[\s]+/g,' ').trim()
-	var numbers = numberlist.split(' ');
-	var results = result.split(' ');
-
+	numbers = numberlist.split(' ')
+	results = result.split(' ')
+    for (i=0;i<results.length;i++) results[i] = results[i].replace(/␣/g,' ')
 	
 	// output the numbers horizontally with ascii originals in title attribute
-	var out = '<div id="horizresults">'
+	var out = '<div id="counterstyles">'
 	for (var n=0; n<numbers.length; n++) {
-		out += '<span style="white-space:nowrap"><span class="'
+		out += '<span class="counterstyle" dir="auto">'
+        out += '<span class="nativeNumber">'+results[n]+'</span>'
+        out += '<span class="'
 		if (document.getElementById('showAscii').checked) out += 'original'
 		else out += 'hidden'
-		out += '">'+numbers[n]+'</span><span class="nativeNumber" dir="auto">'+results[n]+'</span></span> '
+		out += '">'+numbers[n]+'</span>'
+        out +='</span> '
 		}
 	out += '</div>';
-	document.getElementById('output').innerHTML = out;
+
 	
+	if (document.getElementById('showMarkup').checked) {
+		var out = '<div id="counterstylesMarkup">&lt;figure class="auto counterstylesBox noindex" data-cols="" data-notes="'
+		for (var n=0; n<numbers.length; n++) {
+			out += numbers[n]
+			if (n<numbers.length-1) out += ','
+			}
+		out += '">'
+		for (var n=0; n<numbers.length; n++) {
+			out += results[n]
+			if (n<numbers.length-1) out += '␣'
+			}
+		out += '&lt;/figure></div>';
+		}
+
+
+	document.getElementById('output').innerHTML = out;
 	}
 
 
