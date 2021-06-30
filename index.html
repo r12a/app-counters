@@ -51,8 +51,7 @@
 </div>
 </aside>
 
-<div class="section">
-  <form action="none" onsubmit="displayResult( document.getElementById('numbers').value, parseRule(document.getElementById('system').value, document.getElementById('numbers').value)); document.getElementById('rules').value = document.getElementById('numbers').value.replace(/;\s?/g,';\n'); return false;">
+<section id="form">
     <p>Type in the numbers you want to convert:<br><span style="font-size:smaller;">Separate digits with a space, or use an ASCII hyphen to indicate a range.</span><br/>
       <input class="inputbox" id="numbers" type="text" placeholder="eg. 1 2 3 5-10 20 100">
     </p>
@@ -272,10 +271,9 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九'; suffix: '�
       <!--&nbsp;&nbsp;
       <button type="submit">Convert</button-->
     </p>
-  </form>
  
      <p>Or paste the counter-style rule here:<br/>
-<textarea class="inputbox"  id="rules" style="width: 80%" placeholder="Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }"></textarea><br>
+<textarea class="inputbox"  id="rules" style="width: 100%" placeholder="Example: @counter-style trinary { system: numeric;  symbols: '0' '1' '2'; }"></textarea><br>
 
 <button style="vertical-align:top;" 
     onclick="displayResult( expandNumbers(document.getElementById('numbers').value), parseRule(document.getElementById('rules').value, expandNumbers(document.getElementById('numbers').value)))
@@ -299,7 +297,7 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九'; suffix: '�
 
 
 <div id="output" dir="auto" style="text-align: start;">&nbsp;</div>
-</div>
+</section>
 
 
 
@@ -379,7 +377,7 @@ symbols: '〇' '一' '二' '三' '四' '五' '六' '七' '八' '九'; suffix: '�
 
 
 <div class="smallprint"><span id="version">First published  24 Jul 2013.  This version <span id="version-info"> 
-<!-- #BeginDate format:IS1m -->2021-06-30  6:23<!-- #EndDate --> 
+<!-- #BeginDate format:IS1m -->2021-06-30  6:51<!-- #EndDate --> 
   </span> GMT. &nbsp;&bull;&nbsp; Copyright <a href="mailto:r12a@w3.org">r12a@w3.org</a>. Licence <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC-By</a>.</span></div>
 </body>
 </html>

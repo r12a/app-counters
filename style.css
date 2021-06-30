@@ -68,13 +68,13 @@ h2 {
 	}
 
 /* Form */	
-form {
+#form {
 	font-size: 95%;
 	color: gray;
 	text-align: left;
 	}
 	
-form select, form select option, form input {
+#form select, #form select option, #form input {
 	color: gray;
 	font-size: 100%;
 	}
@@ -112,7 +112,7 @@ button {
 	color: brown;
 	}
 
-form {
+#form {
 	display: inline;
 	}
 	
@@ -152,7 +152,7 @@ sub { color:#C30; font-style: italic; }
 .originalNumber { font-size: 30px; color: #999; }
 #output { color: #C33; font-size: 30px; margin: 1em 30% 2em 7.5%; line-height: 1.4em; }
 .inputbox { width: 100%; border-radius: 10px; border: 2px solid #eee; }
-#numbers { font-size: 200%; padding: .5em; }
+#form #numbers { font-size: 200%; padding: .5em; }
 #rules { height: 100px; }
 .original { color: #999; font-size: 14px;  margin: 0 2px; }
 .hidden { display:none; }
