@@ -89,6 +89,7 @@ button {
     line-height: 1.5em;
     padding: 5px;
     border: 1px solid #DDD;
+    color: chocolate;
 }
 
 #registryForm fieldset {
