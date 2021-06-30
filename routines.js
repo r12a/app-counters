@@ -344,13 +344,16 @@ function displayResult (numberlist, result) {
 	for (var n=0; n<numbers.length; n++) {
 		out += '<span class="counterstyle" dir="auto">'
         out += '<span class="nativeNumber">'+results[n]+'</span>'
-        out += '<span class="'
-		if (document.getElementById('showAscii').checked) out += 'original'
-		else out += 'hidden'
-		out += '">'+numbers[n]+'</span>'
+        //out += '<span class="'
+		//if (document.getElementById('showAscii').checked) out += 'original'
+		//else out += 'hidden'
+		//out += '">'+numbers[n]+'</span>'
+		if (document.getElementById('showAscii').checked) {
+            out += '<span class="original">'+numbers[n]+'</span>'
+            }
         out +='</span> '
 		}
-	out += '</div>';
+	out += '</div>'
 
 	
 	if (document.getElementById('showMarkup').checked) {
@@ -364,11 +367,11 @@ function displayResult (numberlist, result) {
 			out += results[n]
 			if (n<numbers.length-1) out += '␣'
 			}
-		out += '&lt;/figure></div>';
+		out += '&lt;/figure></div>'
 		}
 
 
-	document.getElementById('output').innerHTML = out;
+	document.getElementById('output').innerHTML = out
 	}
 
 
@@ -592,3 +595,13 @@ function doEthiopicNumeric (numbers) {
 	return str;
 	}
 
+
+
+function copyToClipboard (chars) { 
+	// copies characters to clipboard when you click on an icon	
+	document.getElementById('clipboardStore').value = chars
+	
+	document.getElementById('clipboardStore').focus()
+	document.getElementById('clipboardStore').select()
+	document.execCommand('copy')
+	}
