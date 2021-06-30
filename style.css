@@ -90,7 +90,8 @@ button {
     padding: 5px;
     border: 1px solid #DDD;
     color: chocolate;
-}
+    background-color: #fef3e6;
+    }
 
 #registryForm fieldset {
 	border: 0;
